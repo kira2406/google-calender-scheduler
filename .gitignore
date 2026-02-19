@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Environment Variables (Secrets)
+.env
+
+# Google Cloud & Calendar Credentials (CRITICAL - DO NOT REMOVE)
+credentials.json
+token.json
+client_secret_*.json
+service_account.json
+*.json
+
+# Except for these JSON files which might be config (Optional)
+!app.json
+!package.json
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
