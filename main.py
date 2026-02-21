@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import requests
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 
@@ -26,6 +27,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+RETELL_API_KEY = os.environ.get("RETELL_API_KEY")
+RETELL_AGENT_ID = os.environ.get("RETELL_AGENT_ID")
 
 # --- 2. Google Calendar Service ---
 class GoogleCalendarService:
@@ -191,5 +195,26 @@ async def book_meeting(request: BookMeetingRequest):
         return {"result": link, "status": "error"}
         
     return {"result": f"Success. Meeting booked. Link: {link}", "status": "success"}
+
+@app.post("/api/create-web-call")
+async def create_web_call():
+    """Starts a Retell Web Call and returns an access token for the frontend."""
+    if not RETELL_API_KEY or not RETELL_AGENT_ID:
+        raise HTTPException(status_code=500, detail="Retell API Key or Agent ID not configured on server.")
+
+    url = "https://api.retellai.com/v2/create-web-call"
+    payload = {"agent_id": RETELL_AGENT_ID}
+    headers = {
+        "Authorization": f"Bearer {RETELL_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        response.raise_for_status()
+        return response.json() # Returns { access_token: "...", call_id: "..." }
+    except Exception as e:
+        logger.error(f"Retell API Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to initiate web call with Retell.")
 
 # To run: uv run uvicorn main:app --reload

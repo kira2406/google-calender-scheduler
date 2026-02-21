@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clara | AI Scheduling Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Retell Client SDK -->
+    <script src="https://unpkg.com/retell-client-js-sdk@latest/dist/retell-client-js-sdk.umd.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .glow { box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+        .pulse-animation { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+
+    <!-- Header Section -->
+    <div class="text-center mb-12 max-w-lg">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-sky-500/10 rounded-full mb-4 border border-sky-500/20">
+            <i class="fa-solid fa-calendar-check text-sky-400 text-2xl"></i>
+        </div>
+        <h1 class="text-4xl font-bold tracking-tight mb-2">Talk to Clara</h1>
+        <p class="text-slate-400 text-lg">Your AI scheduling assistant. Book meetings on Google Calendar just by speaking.</p>
+    </div>
+
+    <!-- Main Interaction Card -->
+    <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl w-full max-w-md shadow-2xl relative">
+        <div class="absolute top-4 right-4 flex items-center space-x-2">
+            <div id="status-dot" class="w-2 h-2 rounded-full bg-slate-600 transition-colors duration-300"></div>
+            <span id="status-text" class="text-xs font-medium uppercase tracking-widest text-slate-500">Disconnected</span>
+        </div>
+
+        <div class="flex flex-col items-center py-6">
+            <!-- Visualizer Sphere -->
+            <div id="visualizer" class="w-32 h-32 rounded-full border-4 border-slate-700 flex items-center justify-center mb-8 transition-all duration-300">
+                <i id="mic-icon" class="fa-solid fa-microphone text-4xl text-slate-600 transition-colors duration-300"></i>
+            </div>
+
+            <!-- Action Button -->
+            <button id="call-btn" class="w-full py-4 bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold rounded-2xl transition-all active:scale-95 glow shadow-lg shadow-sky-500/20">
+                Start Web Call
+            </button>
+            
+            <p id="hint-text" class="mt-6 text-sm text-slate-500 text-center">
+                Clara will ask for your name and preferred meeting time.
+            </p>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl w-full">
+        <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center">
+            <h3 class="text-sky-400 font-semibold mb-1 text-sm">Natural Voice</h3>
+            <p class="text-xs text-slate-500">Human-like conversational flow</p>
+        </div>
+        <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center">
+            <h3 class="text-sky-400 font-semibold mb-1 text-sm">Smart Check</h3>
+            <p class="text-xs text-slate-500">Automatic availability lookups</p>
+        </div>
+        <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 text-center">
+            <h3 class="text-sky-400 font-semibold mb-1 text-sm">Instant Sync</h3>
+            <p class="text-xs text-slate-500">One-click calendar booking</p>
+        </div>
+    </div>
+
+    <script>
+        // Use relative URL for the backend token endpoint
+        const API_ENDPOINT = "/api/create-web-call"; 
+        
+        let retellClient;
+        let isCalling = false;
+
+        const callBtn = document.getElementById('call-btn');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const visualizer = document.getElementById('visualizer');
+        const micIcon = document.getElementById('mic-icon');
+
+        async function initRetell() {
+            // Initialize the SDK
+            retellClient = new RetellClient();
+
+            // Handle connection updates
+            retellClient.on("call_started", () => {
+                updateUI('active');
+            });
+
+            retellClient.on("call_ended", () => {
+                updateUI('inactive');
+                isCalling = false;
+            });
+
+            retellClient.on("error", (error) => {
+                console.error("Retell Error:", error);
+                updateUI('inactive');
+                isCalling = false;
+            });
+        }
+
+        function updateUI(state) {
+            if (state === 'active') {
+                callBtn.innerText = "End Call";
+                callBtn.className = "w-full py-4 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-2xl transition-all active:scale-95";
+                statusDot.className = "w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]";
+                statusText.innerText = "Live";
+                statusText.className = "text-xs font-medium uppercase tracking-widest text-green-500";
+                visualizer.classList.add('border-sky-500', 'pulse-animation');
+                micIcon.className = "fa-solid fa-microphone text-4xl text-sky-400";
+            } else {
+                callBtn.innerText = "Start Web Call";
+                callBtn.className = "w-full py-4 bg-sky-500 hover:bg-sky-400 text-slate-900 font-bold rounded-2xl transition-all active:scale-95 glow shadow-lg shadow-sky-500/20";
+                statusDot.className = "w-2 h-2 rounded-full bg-slate-600";
+                statusText.innerText = "Disconnected";
+                statusText.className = "text-xs font-medium uppercase tracking-widest text-slate-500";
+                visualizer.classList.remove('border-sky-500', 'pulse-animation');
+                micIcon.className = "fa-solid fa-microphone text-4xl text-slate-600";
+            }
+        }
+
+        callBtn.addEventListener('click', async () => {
+            if (isCalling) {
+                retellClient.stopCall();
+            } else {
+                try {
+                    statusText.innerText = "Connecting...";
+                    isCalling = true;
+                    
+                    // 1. Get access token from the backend
+                    const response = await fetch(API_ENDPOINT, { 
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (!response.ok) throw new Error("Failed to fetch access token from backend");
+                    
+                    const data = await response.json();
+
+                    if (!data.access_token) {
+                        throw new Error("No access_token returned from server");
+                    }
+
+                    // 2. Start the call using the token
+                    await retellClient.startCall({
+                        accessToken: data.access_token
+                    });
+
+                } catch (err) {
+                    console.error("Connection failed", err);
+                    alert("Failed to start call: " + err.message);
+                    isCalling = false;
+                    updateUI('inactive');
+                }
+            }
+        });
+
+        // Initialize on load
+        window.onload = initRetell;
+    </script>
+</body>
+</html>
