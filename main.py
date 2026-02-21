@@ -124,7 +124,7 @@ class GoogleCalendarService:
             event_summary = title if title else f"Meeting with {name}"
             event = {
                 'summary': event_summary,
-                'description': "Booked via Kushwanth's Voice Scheduler Agent.",
+                'description': f"Meeting with {name} booked via Kushwanth's Voice Scheduler Agent.",
                 'start': {'dateTime': start_time.isoformat(), 'timeZone': 'UTC'},
                 'end': {'dateTime': end_time.isoformat(), 'timeZone': 'UTC'},
                 # "attendees": [
