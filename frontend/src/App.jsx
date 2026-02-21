@@ -110,7 +110,7 @@ export default function App() {
           <div className="bg-sky-500 p-2 rounded-xl shadow-lg shadow-sky-500/20">
             <Calendar className="text-[#0B0F1A] w-6 h-6" />
           </div>
-          <span className="font-bold text-2xl tracking-tight text-white">Clara<span className="text-sky-500">.ai</span></span>
+          <span className="font-bold text-2xl tracking-tight text-white">Iris<span className="text-sky-500">.ai</span></span>
         </div>
 
         {/* Main Interaction Hub */}
@@ -141,13 +141,13 @@ export default function App() {
           </div>
 
           <h1 className="text-3xl font-bold text-white mb-4 tracking-tight">
-            {callStatus === 'active' ? (isAgentTalking ? "Clara is Speaking" : "Clara is Listening") : callStatus === 'connecting' ? "Connecting..." : "Need to Schedule?"}
+            {callStatus === 'active' ? (isAgentTalking ? "Iris is Speaking" : "Iris is Listening") : callStatus === 'connecting' ? "Connecting..." : "Need to Schedule?"}
           </h1>
           
           <p className="text-slate-400 mb-10 max-w-sm mx-auto leading-relaxed text-balance">
             {callStatus === 'active' 
-              ? "Tell Clara your name and what time you'd like to schedule your session." 
-              : "Experience the easiest way to schedule. Start a voice conversation with Clara now."}
+              ? "Tell Iris your name and what time you'd like to schedule your session." 
+              : "Experience the easiest way to schedule. Start a voice conversation with Iris now."}
           </p>
 
           {errorMessage && (
