@@ -78,8 +78,14 @@ class GoogleCalendarService:
 
         cal_id = os.environ.get("CALENDAR_ID", "primary")
         
-        if not start_iso.endswith('Z') and '+' not in start_iso: start_iso = f"{start_iso}Z"
-        if not end_iso.endswith('Z') and '+' not in end_iso: end_iso = f"{end_iso}Z"
+        # if not start_iso.endswith('Z') and '+' not in start_iso: start_iso = f"{start_iso}Z"
+        # if not end_iso.endswith('Z') and '+' not in end_iso: end_iso = f"{end_iso}Z"
+
+        if not start_iso.endswith('Z') and '+' not in start_iso and not (len(start_iso) > 6 and start_iso[-6] == '-'): 
+            start_iso = f"{start_iso}Z"
+            
+        if not end_iso.endswith('Z') and '+' not in end_iso and not (len(end_iso) > 6 and end_iso[-6] == '-'): 
+            end_iso = f"{end_iso}Z"
 
         try:
             events_result = self.service.events().list(
